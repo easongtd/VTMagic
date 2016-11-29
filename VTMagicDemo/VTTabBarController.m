@@ -15,8 +15,7 @@
 
 @implementation VTTabBarController
 
-- (void)viewDidLoad
-{
+- (void)viewDidLoad {
     [super viewDidLoad];
     
     VTHomeViewController *homeVC = [[VTHomeViewController alloc] init];
@@ -27,7 +26,7 @@
     
     VTBubbleViewController *bubbleVC = [[VTBubbleViewController alloc] init];
     UINavigationController *bubbleNav = [[UINavigationController alloc]initWithRootViewController:bubbleVC];
-    bubbleNav.navigationBarHidden = YES;
+//    bubbleNav.navigationBarHidden = YES;
     UITabBarItem *bubbleItem = [self creatTabBarItemWithTitle:@"气泡"];
     bubbleNav.tabBarItem = bubbleItem;
     
@@ -51,12 +50,11 @@
     
     self.viewControllers = @[homeNav, bubbleNav, centerNav, divideNav, dataNav];
     
-    self.tabBar.barTintColor = RGBCOLOR(239, 239, 239);
-    self.tabBar.alpha = 0.97;
+    [[UITabBar appearance] setBarTintColor:RGBCOLOR(239, 239, 239)];
+    [[UITabBar appearance] setAlpha:0.75];
 }
 
-- (UITabBarItem *)creatTabBarItemWithTitle:(NSString*)title
-{
+- (UITabBarItem *)creatTabBarItemWithTitle:(NSString*)title {
     UITabBarItem *item = [[UITabBarItem alloc] initWithTitle:title image:nil selectedImage:nil];
     [item setTitleTextAttributes:@{NSForegroundColorAttributeName:RGBCOLOR(169, 37, 37)}  forState:UIControlStateSelected];
     [item setTitleTextAttributes:@{NSForegroundColorAttributeName:[UIColor blackColor]} forState:UIControlStateNormal];

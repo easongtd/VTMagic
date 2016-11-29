@@ -7,9 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "UIViewController+Magic.h"
+#import "UIViewController+VTMagic.h"
+#import "UIButton+VTMagic.h"
+#import "VTMagicMacros.h"
 #import "VTMagicView.h"
-#import "VTCommon.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 @interface VTMagicController : UIViewController<VTMagicViewDelegate,VTMagicViewDataSource,VTMagicProtocol>
 
@@ -31,7 +34,7 @@
 /**
  *  当前显示的控制器
  */
-@property (nonatomic, strong) __kindof UIViewController *currentViewController;
+@property (nonatomic, strong, nullable) __kindof UIViewController *currentViewController;
 
 /**
  *  屏幕上可见的控制器
@@ -46,7 +49,7 @@
  *
  *  @return UIViewController对象
  */
-- (__kindof UIViewController *)viewControllerAtPage:(NSUInteger)pageIndex;
+- (nullable __kindof UIViewController *)viewControllerAtPage:(NSUInteger)pageIndex;
 
 /**
  *  切换到指定页面
@@ -57,3 +60,5 @@
 - (void)switchToPage:(NSUInteger)pageIndex animated:(BOOL)animated;
 
 @end
+
+NS_ASSUME_NONNULL_END

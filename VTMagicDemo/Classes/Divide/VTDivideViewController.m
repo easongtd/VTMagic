@@ -18,13 +18,12 @@
 
 @implementation VTDivideViewController
 
-- (void)viewDidLoad
-{
+- (void)viewDidLoad {
     [super viewDidLoad];
     
+    self.edgesForExtendedLayout = UIRectEdgeAll;
     self.view.backgroundColor = [UIColor whiteColor];
     self.magicView.navigationColor = [UIColor whiteColor];
-    self.magicView.sliderColor = RGBCOLOR(169, 37, 37);
     self.magicView.layoutStyle = VTLayoutStyleDivide;
     self.magicView.switchStyle = VTSwitchStyleStiff;
     self.magicView.navigationHeight = 44.f;
@@ -37,16 +36,14 @@
     [self.magicView reloadData];
 }
 
-- (void)viewWillAppear:(BOOL)animated
-{
+- (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
     [self.navigationController setNavigationBarHidden:YES animated:YES];
 }
 
 #pragma mark - VTMagicViewDataSource
-- (NSArray<NSString *> *)menuTitlesForMagicView:(VTMagicView *)magicView
-{
+- (NSArray<NSString *> *)menuTitlesForMagicView:(VTMagicView *)magicView {
     NSMutableArray *titleList = [NSMutableArray array];
     for (MenuInfo *menu in _menuList) {
         [titleList addObject:menu.title];
@@ -54,8 +51,7 @@
     return titleList;
 }
 
-- (UIButton *)magicView:(VTMagicView *)magicView menuItemAtIndex:(NSUInteger)itemIndex
-{
+- (UIButton *)magicView:(VTMagicView *)magicView menuItemAtIndex:(NSUInteger)itemIndex {
     static NSString *itemIdentifier = @"itemIdentifier";
     UIButton *menuItem = [magicView dequeueReusableItemWithIdentifier:itemIdentifier];
     if (!menuItem) {
@@ -67,8 +63,7 @@
     return menuItem;
 }
 
-- (UIViewController *)magicView:(VTMagicView *)magicView viewControllerAtPage:(NSUInteger)pageIndex
-{
+- (UIViewController *)magicView:(VTMagicView *)magicView viewControllerAtPage:(NSUInteger)pageIndex {
     static NSString *gridId = @"grid.identifier";
     VTGridViewController *viewController = [magicView dequeueReusablePageWithIdentifier:gridId];
     if (!viewController) {
@@ -79,8 +74,7 @@
 }
 
 #pragma mark - actions
-- (void)subscribeAction
-{
+- (void)subscribeAction {
     NSLog(@"取消／恢复菜单栏选中状态");
     // select/deselect menu item
     if (self.magicView.isDeselected) {
@@ -93,14 +87,12 @@
 }
 
 #pragma mark - functional methods
-- (void)generateTestData
-{
+- (void)generateTestData {
     _menuList = @[[MenuInfo menuInfoWithTitl:@"国内"], [MenuInfo menuInfoWithTitl:@"国外"],
                   [MenuInfo menuInfoWithTitl:@"港澳"], [MenuInfo menuInfoWithTitl:@"台湾"]];
 }
 
-- (void)integrateComponents
-{
+- (void)integrateComponents {
     UIButton *rightButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 50, 30)];
     [rightButton addTarget:self action:@selector(subscribeAction) forControlEvents:UIControlEventTouchUpInside];
     [rightButton setTitleColor:RGBACOLOR(169, 37, 37, 0.6) forState:UIControlStateSelected];
@@ -111,8 +103,7 @@
     self.magicView.rightNavigatoinItem = rightButton;
 }
 
-- (void)configCustomSlider
-{
+- (void)configCustomSlider {
     UIImageView *sliderView = [[UIImageView alloc] init];
     [sliderView setImage:[UIImage imageNamed:@"magic_arrow"]];
     sliderView.contentMode = UIViewContentModeScaleAspectFit;

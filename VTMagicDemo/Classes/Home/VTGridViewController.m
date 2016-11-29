@@ -8,8 +8,9 @@
 
 #import "VTGridViewController.h"
 #import "VTDetailViewController.h"
+#import <VTMagic/VTMagic.h>
 #import "VTGridViewCell.h"
-#import "VTMagic.h"
+#import "DataManager.h"
 
 #define IPHONELESS6 ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? 640 == [[UIScreen mainScreen] currentMode].size.width : NO)
 static NSString *reuseIdentifier = @"grid.reuse.identifier";
@@ -22,8 +23,7 @@ static NSString *reuseIdentifier = @"grid.reuse.identifier";
 
 @implementation VTGridViewController
 
-- (instancetype)init
-{
+- (instancetype)init {
     BOOL iPhoneDevice = kiPhoneDevice;
     UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
     layout.scrollDirection = UICollectionViewScrollDirectionVertical;
@@ -34,24 +34,22 @@ static NSString *reuseIdentifier = @"grid.reuse.identifier";
     return [super initWithCollectionViewLayout:layout];
 }
 
-- (void)viewDidLoad
-{
+- (void)viewDidLoad {
     [super viewDidLoad];
     
     self.collectionView.scrollsToTop = NO;
     self.collectionView.backgroundColor = RGBCOLOR(239, 239, 239);
+    self.collectionView.contentInset = UIEdgeInsetsMake(0, 0, VTTABBAR_HEIGHT, 0);
     [self.collectionView registerClass:[VTGridViewCell class] forCellWithReuseIdentifier:reuseIdentifier];
 }
 
-- (void)viewWillAppear:(BOOL)animated
-{
+- (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
     VTPRINT_METHOD
 }
 
-- (void)viewDidAppear:(BOOL)animated
-{
+- (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     
     [self refreshPageIfNeeded];
@@ -61,8 +59,7 @@ static NSString *reuseIdentifier = @"grid.reuse.identifier";
     VTPRINT_METHOD
 }
 
-- (void)viewWillDisappear:(BOOL)animated
-{
+- (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
     
     [self cancelNetworkRequest];
@@ -70,21 +67,19 @@ static NSString *reuseIdentifier = @"grid.reuse.identifier";
     VTPRINT_METHOD
 }
 
-- (void)viewDidDisappear:(BOOL)animated
-{
+- (void)viewDidDisappear:(BOOL)animated {
     [super viewDidDisappear:animated];
     
+    [self savePageInfo];
     VTPRINT_METHOD
 }
 
 #pragma mark UICollectionViewDataSource
-- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
-{
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
     return _infoList.count;
 }
 
-- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
-{
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     VTGridViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
     cell.backgroundColor = [UIColor whiteColor];
     NSString *imageName = _infoList[indexPath.item];
@@ -94,8 +89,7 @@ static NSString *reuseIdentifier = @"grid.reuse.identifier";
     return cell;
 }
 
-- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
-{
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
     NSInteger currentPage = self.magicController.currentPage;
     NSLog(@"==didSelectItemAtIndexPath%@ \n current page is: %ld==", indexPath, (long)currentPage);
     VTDetailViewController *detailViewController = [[VTDetailViewController alloc] init];
@@ -104,8 +98,7 @@ static NSString *reuseIdentifier = @"grid.reuse.identifier";
 }
 
 #pragma mark - VTMagicReuseProtocol
-- (void)vtm_prepareForReuse
-{
+- (void)vtm_prepareForReuse {
     // reset content offset
     NSLog(@"clear old data if needed:%@", self);
     [_infoList removeAllObjects];
@@ -114,47 +107,53 @@ static NSString *reuseIdentifier = @"grid.reuse.identifier";
 }
 
 #pragma mark - functional methods
-- (void)refreshPageIfNeeded
-{
+- (void)refreshPageIfNeeded {
     NSTimeInterval currentStamp = [[NSDate date] timeIntervalSince1970];
-    if (currentStamp - _menuInfo.lastTime < 60 * 60) return;
-    // 延时处理，模拟网络请求，根据_menuInfo.menuId请求对应菜单项的相关信息
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    if (self.infoList.count && currentStamp - _menuInfo.lastTime < 60 * 60) {
+        return;
+    }
+    
+    // 模拟网络请求延时，根据_menuInfo.menuId请求对应菜单项的相关信息
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.02 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         _menuInfo.lastTime = currentStamp;
         [self handleNetworkSuccess];
     });
 }
 
-- (void)cancelNetworkRequest
-{
+- (void)cancelNetworkRequest {
     // 由于页面可能会被重用，需要取消不必要的网络请求
 //    NSLog(@"maybe you should cancel network request in here");
 }
 
-- (void)handleNetworkSuccess
-{
+- (void)handleNetworkSuccess {
     NSLog(@"==模拟网络请求成功后刷新页面==");
-    _infoList = [[NSMutableArray alloc] init];
     for (NSInteger index = 0; index < 50; index++) {
-        [_infoList addObject:[NSString stringWithFormat:@"image_%d", arc4random_uniform(13)]];
+        [self.infoList addObject:[NSString stringWithFormat:@"image_%d", arc4random_uniform(13)]];
     }
     [self.collectionView reloadData];
 }
 
-- (void)loadLocalData
-{
-    _infoList = [[NSMutableArray alloc] init];
-    for (NSInteger index = 0; index < 50; index++) {
-        [_infoList addObject:[NSString stringWithFormat:@"image_%d", arc4random_uniform(13)]];
-    }
+- (void)savePageInfo {
+    [[DataManager sharedInstance] savePageInfo:_infoList menuId:_menuInfo.menuId];
+}
+
+- (void)loadLocalData {
+    NSArray *cacheList = [[DataManager sharedInstance] pageInfoWithMenuId:_menuInfo.menuId];
+    [_infoList addObjectsFromArray:cacheList];
     [self.collectionView reloadData];
 }
 
 #pragma mark - accessor methods
-- (void)setMenuInfo:(MenuInfo *)menuInfo
-{
+- (void)setMenuInfo:(MenuInfo *)menuInfo {
     _menuInfo = menuInfo;
     [self loadLocalData];
+}
+
+- (NSMutableArray *)infoList {
+    if (!_infoList) {
+        _infoList = [[NSMutableArray alloc] init];
+    }
+    return _infoList;
 }
 
 @end
